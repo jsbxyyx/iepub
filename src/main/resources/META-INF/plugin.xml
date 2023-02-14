@@ -1,0 +1,29 @@
+<idea-plugin>
+    <id>io.github.jsbxyyx.iepub</id>
+    <name>iepub</name>
+    <vendor url="https://github.com/jsbxyyx/iepub">jsbxyyx</vendor>
+
+    <description><![CDATA[
+    iepub is read local epub book plugin.
+
+    Shortcut keys:
+    1. Left and right keys turn pages
+    2. Numbers 1 and 2 switch theme
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="iepub" anchor="right" factoryClass="io.github.jsbxyyx.iepub.IepubWindowFactory"/>
+    </extensions>
+
+    <application-components>
+        <!-- Add your application components here -->
+    </application-components>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+
+</idea-plugin>
