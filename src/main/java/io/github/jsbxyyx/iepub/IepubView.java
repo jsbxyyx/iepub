@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 import java.util.function.Function;
@@ -106,9 +107,10 @@ public class IepubView extends JPanel {
     public void openContent(int index) {
         try {
             List<Resource> contents = book.getContents();
-            String data = new String(contents.get(index).getData());
+            Resource resource = contents.get(index);
+            String data = new String(resource.getData(), resource.getInputEncoding());
             data = data.replace(xml, "");
-            data = repairContent(data, (src) -> {
+            data = convertImg(data, (src) -> {
                 byte[] srcData = new byte[0];
                 try {
                     srcData = book.getResources().getByIdOrHref(src).getData();
@@ -144,7 +146,7 @@ public class IepubView extends JPanel {
         openContent(current);
     }
 
-    public static String repairContent(String content, Function<String, String> f) {
+    public static String convertImg(String content, Function<String, String> f) {
         String patternStr = "<img\\s*([^>]*)\\s*src=\\\"(.*?)\\\"\\s*([^>]*)>";
         Pattern pattern = Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(content);
