@@ -3,6 +3,8 @@ package io.github.jsbxyyx.iepub;
 import nl.siegmann.epublib.domain.Book;
 import nl.siegmann.epublib.domain.Metadata;
 import nl.siegmann.epublib.domain.Resource;
+import nl.siegmann.epublib.domain.Spine;
+import nl.siegmann.epublib.domain.SpineReference;
 import nl.siegmann.epublib.epub.EpubReader;
 
 import javax.swing.*;
@@ -13,7 +15,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +40,6 @@ public class IepubView extends JPanel {
     private JButton btnFirst;
     private JButton btnLast;
 
-    private Book book;
     private int current = 0;
 
     private static final String xml = "<?xml version='1.0' encoding='utf-8'?>";
@@ -114,21 +114,20 @@ public class IepubView extends JPanel {
 
         btnFirst = new JButton("First");
         btnFirst.addActionListener(e -> {
-            openContent(0, 0);
+            first();
         });
         s.add(btnFirst);
 
         btnLast = new JButton("Last");
         btnLast.addActionListener(e -> {
-            Book book = BookHolder.getBook();
-            openContent(book.getResources().size() - 1, 0);
+            last();
         });
         s.add(btnLast);
     }
 
     public void openBook(File file) {
         try {
-            book = reader.readEpub(new FileInputStream(file));
+            Book book = reader.readEpub(new FileInputStream(file));
             BookHolder.setBook(book);
         } catch (IOException e) {
             PropertiesUtil.log("open book failed. " + e.getMessage());
@@ -162,21 +161,22 @@ public class IepubView extends JPanel {
     public void openContent(int index, int pagey) {
         try {
             BookHolder.setIndex(index);
-            List<Resource> contents = book.getContents();
-            Resource resource = contents.get(index);
+            Spine spine = BookHolder.getBook().getSpine();
+            SpineReference spineReference = spine.getSpineReferences().get(index);
+            Resource resource = spineReference.getResource();
             String data = new String(resource.getData(), resource.getInputEncoding());
             data = data.replace(xml, "");
             data = convertImg(data, (src) -> {
                 byte[] srcData = new byte[0];
                 try {
-                    srcData = book.getResources().getByIdOrHref(src).getData();
+                    srcData = BookHolder.getBook().getResources().getByIdOrHref(src).getData();
                 } catch (IOException ignore) {
                 }
                 return "data:image/png;base64, " + Base64.getEncoder().encodeToString(srcData);
             });
             System.out.println(data);
             browser.loadHtml(data);
-            // page offset go to pageY
+            // TODO page offset go to pageY
             goTop();
         } catch (IOException e) {
             e.printStackTrace();
@@ -184,6 +184,16 @@ public class IepubView extends JPanel {
     }
 
     public void goTop() {
+    }
+
+    public void first() {
+        current = 0;
+        openContent(current, 0);
+    }
+
+    public void last() {
+        current = BookHolder.getBook().getSpine().size() - 1;
+        openContent(current, 0);
     }
 
     public void prev() {
@@ -195,7 +205,7 @@ public class IepubView extends JPanel {
     }
 
     public void next() {
-        if (current >= book.getContents().size() - 1) {
+        if (current >= BookHolder.getBook().getSpine().size() - 1) {
             return;
         }
         current++;
