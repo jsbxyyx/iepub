@@ -1,7 +1,6 @@
 package io.github.jsbxyyx.iepub;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.jcef.JBCefBrowser;
 import com.intellij.ui.jcef.JBCefClient;
 import com.intellij.ui.jcef.JBCefJSQuery;
@@ -35,11 +34,22 @@ public class JcefBrowser implements Disposable {
         browser.loadHTML(html);
     }
 
-    public void keydown(Function<Integer, Void> f) {
+    public void executeJavaScript(String script) {
+        cefBrowser.executeJavaScript(script, null, 0);
+    }
+
+    public void initJava(Function<Integer, Void> keydownFun, Function<Integer, Void> pageYFun) {
         JBCefJSQuery keydown = JBCefJSQuery.create(browser);
         keydown.addHandler((args) -> {
             int keyCode = Integer.parseInt(args);
-            if (f != null) f.apply(keyCode);
+            if (keydownFun != null) keydownFun.apply(keyCode);
+            return new JBCefJSQuery.Response("1");
+        });
+
+        JBCefJSQuery pageY = JBCefJSQuery.create(browser);
+        pageY.addHandler((args) -> {
+            int pagey = Integer.parseInt(args);
+            if (pageYFun != null) pageYFun.apply(pagey);
             return new JBCefJSQuery.Response("1");
         });
 
@@ -48,8 +58,15 @@ public class JcefBrowser implements Disposable {
             public void onLoadStart(CefBrowser browser, CefFrame frame, CefRequest.TransitionType transitionType) {
                 browser.executeJavaScript(
                         "window.java = {" +
-                                "keydown:function(arg){" +
+                                "keydown: function(arg) {" +
                                 keydown.inject("arg",
+                                        "(response) => {console.log(response);}",
+                                        "(error_code, error_message) => {console.log(error_code, error_message);}") +
+                                "}," +
+                                "" +
+                                "pageY: function() {" +
+                                "var arg = window.pageYOffset;" +
+                                pageY.inject("arg",
                                         "(response) => {console.log(response);}",
                                         "(error_code, error_message) => {console.log(error_code, error_message);}") +
                                 "}" +
@@ -73,12 +90,12 @@ public class JcefBrowser implements Disposable {
                                 "function light() {" +
                                 "document.querySelector('body').style.background = '#f6f7f9';" +
                                 "document.querySelector('body').style.color = '#17181a';" +
-                                "document.querySelectorAll('a').forEach(a => {a.style.color = '#4e7cd0';});" +
+                                "document.querySelectorAll('a').forEach(a => {a.style.color = '#4e7cd0';a.href='';});" +
                                 "};" +
                                 "" +
                                 "dark();" +
                                 "" +
-                                "", "", 0);
+                                "", null, 0);
             }
 
             @Override
@@ -90,10 +107,11 @@ public class JcefBrowser implements Disposable {
 
     @Override
     public void dispose() {
-        cefClient.removeLoadHandler();
-        cefBrowser.stopLoad();
-        cefBrowser.close(false);
-        Disposer.dispose(browser);
+        PropertiesUtil.log("browser dispose");
+//        cefClient.removeLoadHandler();
+//        cefBrowser.stopLoad();
+//        cefBrowser.close(false);
+//        Disposer.dispose(browser);
     }
 
 }
