@@ -100,17 +100,6 @@ public class IepubView extends JPanel {
 
         JPanel s = new JPanel();
         add(s, BorderLayout.SOUTH);
-        btnLeft = new JButton("Left");
-        btnLeft.addActionListener(e -> {
-            prev();
-        });
-        s.add(btnLeft);
-
-        btnRight = new JButton("Right");
-        btnRight.addActionListener(e -> {
-            next();
-        });
-        s.add(btnRight);
 
         btnFirst = new JButton("First");
         btnFirst.addActionListener(e -> {
@@ -123,6 +112,18 @@ public class IepubView extends JPanel {
             last();
         });
         s.add(btnLast);
+
+        btnLeft = new JButton("Left");
+        btnLeft.addActionListener(e -> {
+            prev();
+        });
+        s.add(btnLeft);
+
+        btnRight = new JButton("Right");
+        btnRight.addActionListener(e -> {
+            next();
+        });
+        s.add(btnRight);
     }
 
     public void openBook(File file) {
