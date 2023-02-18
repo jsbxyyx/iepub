@@ -1,5 +1,7 @@
 package io.github.jsbxyyx.iepub;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,12 +41,12 @@ public class IepubConnection extends URLConnection {
     }
 
     private byte[] getData() {
-        String path = url.getPath();
+        String path = url.getPath().replace("../", "");
         byte[] data = new byte[0];
         try {
             data = BookHolder.getBook().getResources().getByIdOrHref(path).getData();
         } catch (IOException e) {
-            e.printStackTrace();
+            PropertiesUtil.log("getData error. " + ExceptionUtils.getStackTrace(e));
         }
         return data;
     }

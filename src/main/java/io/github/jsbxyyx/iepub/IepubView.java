@@ -6,6 +6,7 @@ import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.domain.Spine;
 import nl.siegmann.epublib.domain.SpineReference;
 import nl.siegmann.epublib.epub.EpubReader;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -131,7 +132,7 @@ public class IepubView extends JPanel {
             Book book = reader.readEpub(new FileInputStream(file));
             BookHolder.setBook(book);
         } catch (IOException e) {
-            PropertiesUtil.log("open book failed. " + e.getMessage());
+            PropertiesUtil.log("open book failed. " + ExceptionUtils.getStackTrace(e));
             return;
         }
         current = 0;
@@ -151,7 +152,7 @@ public class IepubView extends JPanel {
                     try {
                         browser.executeJavaScript("window.java.pageY();");
                     } catch (Throwable e) {
-                        PropertiesUtil.log("schedule error. " + e.getMessage());
+                        PropertiesUtil.log("schedule error. " + ExceptionUtils.getStackTrace(e));
                     }
                 }
             }, 5, 5, TimeUnit.SECONDS);
@@ -168,19 +169,21 @@ public class IepubView extends JPanel {
             String data = new String(resource.getData(), resource.getInputEncoding());
             data = data.replace(xml, "");
             data = convertImg(data, (src) -> {
+                src = src.replace("../", "");
                 byte[] srcData = new byte[0];
                 try {
                     srcData = BookHolder.getBook().getResources().getByIdOrHref(src).getData();
-                } catch (IOException ignore) {
+                } catch (Exception e) {
+                    PropertiesUtil.log("convertImg error. " + ExceptionUtils.getStackTrace(e));
                 }
                 return "data:image/png;base64, " + Base64.getEncoder().encodeToString(srcData);
             });
             System.out.println(data);
             browser.loadHtml(data);
-            // TODO page offset go to pageY
+            browser.executeJavaScript("window.scrollTo(0," + pagey + ");");
             goTop();
         } catch (IOException e) {
-            e.printStackTrace();
+            PropertiesUtil.log("openContent error. " + ExceptionUtils.getStackTrace(e));
         }
     }
 
