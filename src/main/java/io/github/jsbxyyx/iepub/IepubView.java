@@ -114,6 +114,7 @@ public class IepubView extends JPanel {
         });
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 new JScrollPane(treeToc), browserComponent);
+        splitPane.setOneTouchExpandable(true);
         add(splitPane, BorderLayout.CENTER);
 
         JPanel s = new JPanel();
