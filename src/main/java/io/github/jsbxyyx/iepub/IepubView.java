@@ -5,17 +5,21 @@ import nl.siegmann.epublib.domain.Metadata;
 import nl.siegmann.epublib.domain.Resource;
 import nl.siegmann.epublib.domain.Spine;
 import nl.siegmann.epublib.domain.SpineReference;
+import nl.siegmann.epublib.domain.TOCReference;
 import nl.siegmann.epublib.epub.EpubReader;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -83,6 +87,18 @@ public class IepubView extends JPanel {
         });
         n.add(btnRefresh);
 
+        treeToc = new JTree(new DefaultTreeModel(new DefaultMutableTreeNode("TOC")));
+        treeToc.addTreeSelectionListener(e -> {
+            DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
+            Object userObject = treeNode.getUserObject();
+            if (userObject instanceof IepubTocNode) {
+                IepubTocNode tocNode = (IepubTocNode) userObject;
+                TOCReference tocReference = tocNode.getTocReference();
+                int index = findResourceIndex(tocReference.getResource());
+                openContent(index, 0);
+            }
+        });
+
         browser = new JcefBrowser();
         browserComponent = browser.getComponent();
         browser.initJava((code) -> {
@@ -96,8 +112,9 @@ public class IepubView extends JPanel {
             setProgress(pagey);
             return null;
         });
-        add(browserComponent, BorderLayout.CENTER);
-
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                new JScrollPane(treeToc), browserComponent);
+        add(splitPane, BorderLayout.CENTER);
 
         JPanel s = new JPanel();
         add(s, BorderLayout.SOUTH);
@@ -144,6 +161,7 @@ public class IepubView extends JPanel {
             pagey = Integer.parseInt(split[1]);
         }
         openContent(current, pagey);
+        openToc();
 
         if (!BookHolder.getStart()) {
             scheduled.scheduleAtFixedRate(new Runnable() {
@@ -157,6 +175,33 @@ public class IepubView extends JPanel {
                 }
             }, 5, 5, TimeUnit.SECONDS);
             BookHolder.setStart(true);
+        }
+    }
+
+    public void openToc() {
+        DefaultTreeModel model = (DefaultTreeModel) treeToc.getModel();
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) model.getRoot();
+        root.removeAllChildren();
+        model.reload();
+        List<TOCReference> tocReferences = BookHolder.getBook().getTableOfContents().getTocReferences();
+        if (tocReferences != null && !tocReferences.isEmpty()) {
+            for (TOCReference tocReference : tocReferences) {
+                DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(new IepubTocNode(tocReference));
+                root.add(childNode);
+                createChildren(tocReference, root);
+            }
+        }
+    }
+
+    private void createChildren(TOCReference tocReference, DefaultMutableTreeNode node) {
+        List<TOCReference> children = tocReference.getChildren();
+        if (children == null || children.isEmpty()) {
+            return;
+        }
+        for (TOCReference child : children) {
+            DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(new IepubTocNode(child));
+            node.add(childNode);
+            createChildren(child, childNode);
         }
     }
 
@@ -185,6 +230,18 @@ public class IepubView extends JPanel {
         } catch (IOException e) {
             PropertiesUtil.log("openContent error. " + ExceptionUtils.getStackTrace(e));
         }
+    }
+
+    public int findResourceIndex(Resource resource) {
+        List<SpineReference> spineReferences = BookHolder.getBook().getSpine().getSpineReferences();
+        int index = -1;
+        for (SpineReference spineReference : spineReferences) {
+            index++;
+            if (spineReference.getResource() == resource) {
+                break;
+            }
+        }
+        return index;
     }
 
     public void goTop() {

@@ -90,7 +90,7 @@ public class JcefBrowser implements Disposable {
                                 "function light() {" +
                                 "document.querySelector('body').style.background = '#f6f7f9';" +
                                 "document.querySelector('body').style.color = '#17181a';" +
-                                "document.querySelectorAll('a').forEach(a => {a.style.color = '#4e7cd0';a.href='';});" +
+                                "document.querySelectorAll('a').forEach(a => {a.style.color = '#4e7cd0';a.href='javascript:void(0);';});" +
                                 "};" +
                                 "" +
                                 "dark();" +
