@@ -13,16 +13,19 @@ public final class IepubURLProtocolHandler {
     }
 
     public static void install() {
-        URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
-            @Override
-            public URLStreamHandler createURLStreamHandler(String protocol) {
-                return IepubConnection.IEPUB.equals(protocol) ? new URLStreamHandler() {
-                    protected URLConnection openConnection(URL url) throws IOException {
-                        return new IepubConnection(url);
-                    }
-                } : null;
-            }
-        });
+        if (System.getProperty("io.github.jsbxyyx.iepub.IepubURLProtocolHandler.Installed") == null) {
+            URL.setURLStreamHandlerFactory(new URLStreamHandlerFactory() {
+                @Override
+                public URLStreamHandler createURLStreamHandler(String protocol) {
+                    return IepubConnection.IEPUB.equals(protocol) ? new URLStreamHandler() {
+                        protected URLConnection openConnection(URL url) throws IOException {
+                            return new IepubConnection(url);
+                        }
+                    } : null;
+                }
+            });
+            System.setProperty("io.github.jsbxyyx.iepub.IepubURLProtocolHandler.Installed", "true");
+        }
     }
 
 }
