@@ -1,6 +1,7 @@
 package io.github.jsbxyyx.iepub;
 
-import com.google.common.base.Throwables;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.io.BufferedWriter;
@@ -21,8 +22,7 @@ public class PropertiesUtil {
 
     private static final String base = System.getProperty("user.home") + "/." + name;
 
-    private static final String filename = "global.properties";
-    private static final File globalFile = new File(base + "/" + filename);
+    private static final File globalFile = new File(base + "/" + "global.properties");
     private static final File logFile = new File(base + "/" + name + ".log");
 
     static {
@@ -30,18 +30,17 @@ public class PropertiesUtil {
         if (!file.exists()) {
             file.mkdirs();
         }
-
         if (!globalFile.exists()) {
             try {
                 globalFile.createNewFile();
             } catch (IOException e) {
-                PropertiesUtil.log(filename + " create fail." + Throwables.getStackTraceAsString(e));
+                PropertiesUtil.log(globalFile.getName() + " create fail." + ExceptionUtils.getStackTrace(e));
             }
         }
         try (FileInputStream in = new FileInputStream(globalFile)) {
             prop.load(in);
         } catch (IOException e) {
-            PropertiesUtil.log("load " + filename + " fail." + Throwables.getStackTraceAsString(e));
+            PropertiesUtil.log("load " + globalFile.getName() + " fail." + ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -49,9 +48,9 @@ public class PropertiesUtil {
     public static void setValue(String key, String value) {
         prop.setProperty(key, value);
         try (FileOutputStream out = new FileOutputStream(globalFile)) {
-            prop.store(out, "");
+            prop.store(out, "date : " + getDateTimeString());
         } catch (IOException e) {
-            PropertiesUtil.log("store " + filename + " error." + Throwables.getStackTraceAsString(e));
+            PropertiesUtil.log("store " + globalFile.getName() + " error." + ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -60,13 +59,30 @@ public class PropertiesUtil {
     }
 
     public static void log(String text) {
+        log(getCaller(3), text, null);
+    }
+
+    public static void log(String text, Throwable throwable) {
+        log(getCaller(3), text, throwable);
+    }
+
+    private static void log(StackTraceElement caller, String text, Throwable throwable) {
         BufferedWriter bw = null;
         try {
             bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logFile, true)));
-            bw.write(DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss.SSS"));
-            bw.write(" ");
-            bw.write(text);
-            bw.write(System.lineSeparator());
+            String d = getDateTimeString();
+            String c = caller.getClassName();
+            String m = caller.getMethodName();
+            String l = caller.getLineNumber() + "";
+            StringBuilder msg = new StringBuilder(text);
+            if (throwable != null) {
+                msg.append(System.lineSeparator());
+                msg.append(ExceptionUtils.getStackTrace(throwable));
+            }
+            String log = StringUtils.replaceEach("${d} ${c}.${m}:${l} - ${msg} ${n}",
+                    new String[]{"${d}", "${c}", "${m}", "${l}", "${msg}", "${n}"},
+                    new String[]{d, c, m, l, msg.toString(), System.lineSeparator()});
+            bw.write(log);
             bw.flush();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -80,6 +96,14 @@ public class PropertiesUtil {
                 }
             }
         }
+    }
+
+    private static StackTraceElement getCaller(int level) {
+        return Thread.currentThread().getStackTrace()[level];
+    }
+
+    private static String getDateTimeString() {
+        return DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss.SSS");
     }
 
 }
