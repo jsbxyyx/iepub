@@ -1,7 +1,5 @@
 package io.github.jsbxyyx.iepub;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +44,7 @@ public class IepubConnection extends URLConnection {
         try {
             data = BookHolder.getBook().getResources().getByIdOrHref(path).getData();
         } catch (IOException e) {
-            PropertiesUtil.log("getData error. " + ExceptionUtils.getStackTrace(e));
+            PropertiesUtil.log("getData error.", e);
         }
         return data;
     }

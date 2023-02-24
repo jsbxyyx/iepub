@@ -34,13 +34,13 @@ public class PropertiesUtil {
             try {
                 globalFile.createNewFile();
             } catch (IOException e) {
-                PropertiesUtil.log(globalFile.getName() + " create fail." + ExceptionUtils.getStackTrace(e));
+                PropertiesUtil.log(globalFile.getName() + " create fail.", e);
             }
         }
         try (FileInputStream in = new FileInputStream(globalFile)) {
             prop.load(in);
         } catch (IOException e) {
-            PropertiesUtil.log("load " + globalFile.getName() + " fail." + ExceptionUtils.getStackTrace(e));
+            PropertiesUtil.log("load " + globalFile.getName() + " fail.", e);
         }
     }
 
@@ -50,7 +50,7 @@ public class PropertiesUtil {
         try (FileOutputStream out = new FileOutputStream(globalFile)) {
             prop.store(out, "date : " + getDateTimeString());
         } catch (IOException e) {
-            PropertiesUtil.log("store " + globalFile.getName() + " error." + ExceptionUtils.getStackTrace(e));
+            PropertiesUtil.log("store " + globalFile.getName() + " error.", e);
         }
     }
 

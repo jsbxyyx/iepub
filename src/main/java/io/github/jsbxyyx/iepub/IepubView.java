@@ -7,7 +7,6 @@ import nl.siegmann.epublib.domain.Spine;
 import nl.siegmann.epublib.domain.SpineReference;
 import nl.siegmann.epublib.domain.TOCReference;
 import nl.siegmann.epublib.epub.EpubReader;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -150,7 +149,7 @@ public class IepubView extends JPanel {
             Book book = reader.readEpub(new FileInputStream(file));
             BookHolder.setBook(book);
         } catch (IOException e) {
-            PropertiesUtil.log("open book failed. " + ExceptionUtils.getStackTrace(e));
+            PropertiesUtil.log("open book failed.", e);
             return;
         }
         current = 0;
@@ -171,7 +170,7 @@ public class IepubView extends JPanel {
                     try {
                         browser.executeJavaScript("window.java.pageY();");
                     } catch (Throwable e) {
-                        PropertiesUtil.log("schedule error. " + ExceptionUtils.getStackTrace(e));
+                        PropertiesUtil.log("schedule error.", e);
                     }
                 }
             }, 5, 5, TimeUnit.SECONDS);
@@ -220,7 +219,7 @@ public class IepubView extends JPanel {
                 try {
                     srcData = BookHolder.getBook().getResources().getByIdOrHref(src).getData();
                 } catch (Exception e) {
-                    PropertiesUtil.log("convertImg error. " + ExceptionUtils.getStackTrace(e));
+                    PropertiesUtil.log("convertImg error.", e);
                 }
                 return "data:image/png;base64, " + Base64.getEncoder().encodeToString(srcData);
             });
@@ -229,7 +228,7 @@ public class IepubView extends JPanel {
             browser.executeJavaScript("window.scrollTo(0," + pagey + ");");
             goTop();
         } catch (IOException e) {
-            PropertiesUtil.log("openContent error. " + ExceptionUtils.getStackTrace(e));
+            PropertiesUtil.log("openContent error.", e);
         }
     }
 
