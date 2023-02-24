@@ -23,7 +23,7 @@ public class PropertiesUtil {
     private static final String base = System.getProperty("user.home") + "/." + name;
 
     private static final File globalFile = new File(base + "/" + "global.properties");
-    private static final File logFile = new File(base + "/" + name + ".log");
+    private static final File logFile = new File(base + "/" + "all.log");
 
     static {
         File file = new File(base);
