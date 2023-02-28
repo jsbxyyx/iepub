@@ -38,13 +38,16 @@ public class IepubView extends JPanel {
     private JcefBrowser browser;
     private JComponent browserComponent;
 
-    private JButton btnLeft;
-    private JButton btnRight;
-
     private JButton btnFirst;
     private JButton btnLast;
 
+    private JButton btnLeft;
+    private JButton btnRight;
+
+    private JLabel labelPageNumber;
+
     private int current = 0;
+    private int total = 0;
 
     private static final String xml = "<?xml version='1.0' encoding='utf-8'?>";
 
@@ -142,6 +145,9 @@ public class IepubView extends JPanel {
             next();
         });
         s.add(btnRight);
+
+        labelPageNumber = new JLabel(current + "/" + total);
+        s.add(labelPageNumber);
     }
 
     public void openBook(File file) {
@@ -153,6 +159,7 @@ public class IepubView extends JPanel {
             return;
         }
         current = 0;
+        total = BookHolder.getBook().getSpine().size() - 1;
         int pagey = 0;
         String progress = getProgress();
         if (progress != null && !"".equals(progress.trim())) {
@@ -245,6 +252,7 @@ public class IepubView extends JPanel {
     }
 
     public void goTop() {
+        labelPageNumber.setText(current + "/" + total);
     }
 
     public void first() {
