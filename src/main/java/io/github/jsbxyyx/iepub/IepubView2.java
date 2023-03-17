@@ -13,6 +13,9 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +41,8 @@ public class IepubView2 extends JPanel {
     private JButton btnNext;
 
     private JLabel labelPageNumber;
+
+    private static final ScheduledExecutorService scheduled = new ScheduledThreadPoolExecutor(1);
 
     public IepubView2() {
         IepubURLProtocolHandler.install();
@@ -125,6 +130,21 @@ public class IepubView2 extends JPanel {
             return;
         }
         gotoBook(BookHolder.getBook());
+
+        if (!BookHolder.getStart()) {
+            scheduled.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Point viewPosition = contentPane.getViewPosition();
+                        setProgress(navigator, 0, (int) viewPosition.getY());
+                    } catch (Throwable e) {
+                        PropertiesUtil.log("schedule error.", e);
+                    }
+                }
+            }, 5, 5, TimeUnit.SECONDS);
+            BookHolder.setStart(true);
+        }
     }
 
     private void gotoBook(Book book) {
@@ -153,9 +173,11 @@ public class IepubView2 extends JPanel {
     }
 
     public void setProgress(Navigator navigator, int x, int y) {
-        String identifier = getIdentifier(navigator.getBook());
-        PropertiesUtil.setValue("p" + identifier, navigator.getCurrentSpinePos() + "," + y);
-        log.info("progress :: " + identifier + " :: " + navigator.getCurrentSpinePos() + "," + y);
+        if (BookHolder.getBook() != null) {
+            String identifier = getIdentifier(navigator.getBook());
+            PropertiesUtil.setValue("p" + identifier, navigator.getCurrentSpinePos() + "," + y);
+            log.info("progress :: " + identifier + " :: " + navigator.getCurrentSpinePos() + "," + y);
+        }
     }
 
     public String getProgress(Book book) {

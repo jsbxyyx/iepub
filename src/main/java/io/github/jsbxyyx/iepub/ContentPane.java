@@ -346,6 +346,10 @@ public class ContentPane extends JPanel implements NavigationEventListener, Hype
         }
     }
 
+    public Point getViewPosition() {
+        return scrollPane.getViewport().getViewPosition();
+    }
+
     public void registerEventCallback(MyEventCallback eventCallback) {
         if (eventCallback != null) {
             myEventCallbackList.add(eventCallback);
