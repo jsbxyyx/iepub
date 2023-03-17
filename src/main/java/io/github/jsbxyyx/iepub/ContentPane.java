@@ -162,9 +162,10 @@ public class ContentPane extends JPanel implements NavigationEventListener, Hype
         JEditorPane editorPane = new JEditorPane();
         editorPane.setBackground(Color.decode("#17181a"));
         editorPane.setEditable(false);
+        editorPane.setFont(Font.getFont("JetBrains Mono"));
         HTMLEditorKit htmlKit = new HTMLEditorKit();
         StyleSheet myStyleSheet = new StyleSheet();
-        String normalTextStyle = "font-size: 11px; font-family: 'JetBrains Mono'; color: #f6f7f9;";
+        String normalTextStyle = "font-size: 11px; font-family: 'JetBrains Mono'; color: #bbbbbb;";
         myStyleSheet.addRule("body {" + normalTextStyle + "}");
         myStyleSheet.addRule("p {" + normalTextStyle + "}");
         myStyleSheet.addRule("div {" + normalTextStyle + "}");
