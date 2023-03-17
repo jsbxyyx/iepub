@@ -164,7 +164,7 @@ public class ContentPane extends JPanel implements NavigationEventListener, Hype
         editorPane.setEditable(false);
         HTMLEditorKit htmlKit = new HTMLEditorKit();
         StyleSheet myStyleSheet = new StyleSheet();
-        String normalTextStyle = "font-size: 12px; color: #f6f7f9;";
+        String normalTextStyle = "font-size: 11px; font-family: ''; color: #f6f7f9;";
         myStyleSheet.addRule("body {" + normalTextStyle + "}");
         myStyleSheet.addRule("p {" + normalTextStyle + "}");
         myStyleSheet.addRule("div {" + normalTextStyle + "}");
