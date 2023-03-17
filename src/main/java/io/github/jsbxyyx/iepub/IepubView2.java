@@ -148,12 +148,14 @@ public class IepubView2 extends JPanel {
     }
 
     private void gotoBook(Book book) {
-        String progress = getProgress(book);
-        String[] split = progress.split("\\,");
-        int spinePos = Integer.parseInt(split[0].trim());
-        int y = Integer.parseInt(split[1].trim());
         navigator.gotoBook(book, this);
-        contentPane.gotoXPage(spinePos, 0, y);
+        String progress = getProgress(book);
+        if (progress != null && !"".equals(progress.trim())) {
+            String[] split = progress.split("\\,");
+            int spinePos = Integer.parseInt(split[0].trim());
+            int y = Integer.parseInt(split[1].trim());
+            contentPane.gotoXPage(spinePos, 0, y);
+        }
     }
 
     public void first() {
