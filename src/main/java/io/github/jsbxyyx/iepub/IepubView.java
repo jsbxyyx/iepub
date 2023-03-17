@@ -30,9 +30,9 @@ public class IepubView extends JPanel {
 
     private EpubReader reader = new EpubReader();
 
-    private JButton btnFile;
-    private JButton btnRefresh;
     private JTextField tfFile;
+    private JButton btnOpenFile;
+    private JButton btnReload;
 
     private JTree treeToc;
     private JcefBrowser browser;
@@ -65,8 +65,8 @@ public class IepubView extends JPanel {
         tfFile = new JTextField(20);
         n.add(tfFile);
 
-        btnFile = new JButton("Open");
-        btnFile.addActionListener(e -> {
+        btnOpenFile = new JButton("Open");
+        btnOpenFile.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser(System.getProperty("user.home"));
             fileChooser.setMultiSelectionEnabled(false);
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -78,16 +78,16 @@ public class IepubView extends JPanel {
                 openBook(file);
             }
         });
-        n.add(btnFile);
+        n.add(btnOpenFile);
 
-        btnRefresh = new JButton("Refresh");
-        btnRefresh.addActionListener(e -> {
+        btnReload = new JButton("Refresh");
+        btnReload.addActionListener(e -> {
             if (BookHolder.getBook() != null) {
                 int index = BookHolder.getIndex();
                 openContent(index, 0);
             }
         });
-        n.add(btnRefresh);
+        n.add(btnReload);
 
         treeToc = new JTree(new DefaultTreeModel(new DefaultMutableTreeNode("TOC")));
         treeToc.addTreeSelectionListener(e -> {

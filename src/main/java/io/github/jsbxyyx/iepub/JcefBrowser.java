@@ -7,6 +7,7 @@ import com.intellij.ui.jcef.JBCefJSQuery;
 import org.cef.CefClient;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
+import org.cef.handler.CefLoadHandler;
 import org.cef.handler.CefLoadHandlerAdapter;
 import org.cef.network.CefRequest;
 
@@ -30,12 +31,20 @@ public class JcefBrowser implements Disposable {
         return browser.getComponent();
     }
 
+    public JBCefBrowser getBrowser() {
+        return browser;
+    }
+
     public void loadHtml(String html) {
         browser.loadHTML(html);
     }
 
     public void executeJavaScript(String script) {
         cefBrowser.executeJavaScript(script, null, 0);
+    }
+
+    public void addLoadHandler(CefLoadHandler handler) {
+        browser.getJBCefClient().addLoadHandler(handler, browser.getCefBrowser());
     }
 
     public void initJava(Function<Integer, Void> keydownFun, Function<Integer, Void> pageYFun) {

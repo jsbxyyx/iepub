@@ -19,7 +19,7 @@ public class IepubWindowFactory implements ToolWindowFactory {
     }
 
     private JComponent getComponent() {
-        return new IepubView();
+        return new IepubView2();
     }
 
 }
